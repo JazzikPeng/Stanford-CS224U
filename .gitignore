@@ -1,0 +1,7 @@
+# Ignore Data #
+ppdb-2.0-s-all
+ppdb-2.0-s-all.gz
+ppdb-2.0-tldr.gz 
+ppdb_train
+
+# Ignore model checkpoint
