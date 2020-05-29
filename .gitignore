@@ -4,4 +4,6 @@ ppdb-2.0-s-all.gz
 ppdb-2.0-tldr.gz 
 ppdb_train
 
+# Ignore notebook
+*.ipynb
 # Ignore model checkpoint
