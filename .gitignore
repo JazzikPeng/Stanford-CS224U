@@ -6,4 +6,5 @@ ppdb_train
 
 # Ignore notebook
 *.ipynb
+.ipynb_checkpoints/
 # Ignore model checkpoint
