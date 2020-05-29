@@ -95,7 +95,7 @@ def main():
     arg_parser.add_argument('--in_file_path', type=str, required=True)
     arg_parser.add_argument('--out_file_path', type=str, required=True)
     arg_parser.add_argument('--min_len', type=int, required=False, default=5)
-    arg_parser.add_argument('--d', action='store_true')
+    arg_parser.add_argument('--orig_in_format', action='store_true')
     args = arg_parser.parse_args()
 
     in_file_path = args.in_file_path
