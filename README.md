@@ -25,3 +25,9 @@ python3 prepro_ppdb.py --in_file_path ./data/ppdb-2.0-s-all --out_file_path ./da
 python3 finetune_bert_with_ppdb.py --train_corpus ./data/ppdb_train --bert_model bert-base-uncased --output_dir checkpoint --do_train
 ```
 The model will start tunning. It will take long time without an GPU.
+
+# EC2 Instance Setup
+Use **p2.xlarge** GPU instance with K80 GPU. Some instance uses Kepler 104 gpu, which is not compatiable with 1.4 version of pytorch. This EC2 instance can be accessed using following command.
+```bash
+ssh -i "deep.pem" ec2-user@ec2-18-204-13-61.compute-1.amazonaws.com
+```
