@@ -141,9 +141,8 @@ def train(dataset,
         for step,  (X, X_mask, labels) in enumerate(tqdm(train_dataloader, desc="Iteration")):
             X.to(device)
             X_mask.to(device)
-            with torch.no_grad():
-                # BERT Encoder
-                output = encoder(X, attention_mask = X_mask)
+            # BERT Encoder
+            output = encoder(X, attention_mask = X_mask)
 
             inputs = cls_featurizer(output) # cls_token
 
