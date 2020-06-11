@@ -124,6 +124,7 @@ def train(dataset,
           lr=0.01,
           batch_size=128):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using {device} for training")
     # Construct PyTorch DataLoader
     train_sampler = RandomSampler(train_dataset)
     train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch_size)
