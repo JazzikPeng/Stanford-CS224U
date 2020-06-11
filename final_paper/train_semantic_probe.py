@@ -138,6 +138,8 @@ def train(dataset,
         tr_loss = 0.
         nb_tr_examples, nb_tr_steps = 0, 0
         for step,  (X, X_mask, labels) in enumerate(tqdm(train_dataloader, desc="Iteration")):
+            X.to(device)
+            X_mask.to(device)
             with torch.no_grad():
                 # BERT Encoder
                 output = encoder(X, attention_mask = X_mask)
