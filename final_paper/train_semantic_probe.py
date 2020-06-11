@@ -132,6 +132,7 @@ def train(dataset,
     loss_function = nn.NLLLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     total_step = len(train_dataloader)
+    classifier.train()
     for epoch in trange(epochs, desc='Epochs'):
         tr_loss = 0.
         nb_tr_examples, nb_tr_steps = 0, 0
@@ -144,8 +145,8 @@ def train(dataset,
 
             inputs = inputs.to(device)
             labels = labels.to(device)
-            outputs = model(inputs)
-            model.zero_grad()
+            outputs = classifier(inputs)
+            classifier.zero_grad()
             loss = loss_function(outputs, labels)
             loss.backward()
             optimizer.step()
