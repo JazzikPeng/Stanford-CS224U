@@ -122,7 +122,7 @@ def train(dataset,
           encoder,
           epochs=100, 
           lr=0.01,
-          batch_size=25600):
+          batch_size=2560):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using {device} for training")
     # Construct PyTorch DataLoader
