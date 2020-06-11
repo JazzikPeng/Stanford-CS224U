@@ -133,6 +133,7 @@ def train(dataset,
     optimizer = optim.Adam(model.parameters(), lr=lr)
     total_step = len(train_dataloader)
     classifier.to(device)
+    encoder.to(device)
     classifier.train()
     for epoch in trange(epochs, desc='Epochs'):
         tr_loss = 0.
@@ -160,11 +161,9 @@ def train(dataset,
         logger.info('Avrg  loss at epoch %d: %.5f' % (epoch, tr_loss / nb_tr_examples))
 
 if __name__ == "__main__":
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     hf_weights_name = 'bert-base-uncased'
     bert_tokenizer = BertTokenizer.from_pretrained(hf_weights_name)
     bert_model = BertModel.from_pretrained(hf_weights_name)
-    bert_model.to(device)
     for param in bert_model.parameters():
         param.requires_grad = False
     train_dataset = PPDBDataset(corpus_path='./data/ppdb_mix',
