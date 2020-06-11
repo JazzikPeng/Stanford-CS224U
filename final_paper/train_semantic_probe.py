@@ -36,7 +36,7 @@ def convert_ppdb_pairs_to_input_text(pair):
     text = text1 + " " + SEP_TOKEN + " "+ text2
     return text, label
 
-def create_trian_data():
+def create_train_data():
     """Create data for training classifier"""
     with open('./data/ppdb_mix', mode='r', encoding='utf-8') as fp:
         ppdb_pairs = json.load(fp)
@@ -142,7 +142,7 @@ def train(dataset,
                 # BERT Encoder
                 output = encoder(X, attention_mask = X_mask)
 
-            inputs = cls_featurizer(output)
+            inputs = cls_featurizer(output) # cls_token
 
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -158,9 +158,11 @@ def train(dataset,
         logger.info('Avrg  loss at epoch %d: %.5f' % (epoch, tr_loss / nb_tr_examples))
 
 if __name__ == "__main__":
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     hf_weights_name = 'bert-base-uncased'
     bert_tokenizer = BertTokenizer.from_pretrained(hf_weights_name)
     bert_model = BertModel.from_pretrained(hf_weights_name)
+    bert_model.to(device)
     for param in bert_model.parameters():
         param.requires_grad = False
     train_dataset = PPDBDataset(corpus_path='./data/ppdb_mix',
