@@ -132,7 +132,7 @@ def test(dataloader, classifier, encoder, device):
         inputs = inputs.to(device)
         outputs = classifier(inputs)
         y_true.extend(list(labels.numpy()))
-        pred = torch.argmax(outputs, dim=1).numpy()
+        pred = torch.argmax(outputs, dim=1).cpu().numpy()
         y_pred.extend(list(pred))
     # Compute F1 Score
     score = f1_score(y_true, y_pred, average='macro')
