@@ -133,6 +133,7 @@ def test(dataloader, classifier, encoder, device):
         outputs = classifier(inputs)
         y_true.extend(list(labels.numpy()))
         pred = torch.argmax(outputs, dim=1).cpu().numpy()
+        print("load pred", pred)
         y_pred.extend(list(pred))
     # Compute F1 Score
     score = f1_score(y_true, y_pred, average='macro')
@@ -178,6 +179,7 @@ def train(dataset,
     for epoch in trange(epochs, desc='Epochs'):
         tr_loss = 0.
         nb_tr_examples, nb_tr_steps = 0, 0
+        print("Start Training")
         for step,  (X, X_mask, labels) in enumerate(tqdm(train_dataloader, desc="Iteration")):
             X = X.to(device)
             X_mask = X_mask.to(device)
@@ -204,6 +206,7 @@ def train(dataset,
         logger.info('Avrg  loss at epoch %d: %.5f' % (epoch+1, tr_loss / nb_tr_examples))
         
         # Evaluate the model f-1
+        print("Testing {}".format(epoch))
         f1_test = test(eval_dataloader, classifier, encoder, device)
         f1_train = test(train_dataloader, classifier, encoder, device)
         logger.info('F1 score at epoch %d | train: %.5f | test: %.5f' % (epoch+1, f1_test, f1_train))
