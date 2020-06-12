@@ -185,8 +185,8 @@ def train(dataset,
             X_mask = X_mask.to(device)
             # BERT Encoder
             test(eval_dataloader, classifier, encoder, device=device)
-
-            output = encoder(X, attention_mask = X_mask)
+            with torch.no_grad():
+                output = encoder(X, attention_mask = X_mask)
 
             inputs = cls_featurizer(output) # cls_token
 
