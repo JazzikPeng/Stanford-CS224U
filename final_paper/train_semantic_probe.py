@@ -184,7 +184,6 @@ def train(dataset,
             X = X.to(device)
             X_mask = X_mask.to(device)
             # BERT Encoder
-            test(eval_dataloader, classifier, encoder, device=device)
             with torch.no_grad():
                 output = encoder(X, attention_mask = X_mask)
 
@@ -206,10 +205,10 @@ def train(dataset,
         logger.info('Avrg  loss at epoch %d: %.5f' % (epoch+1, tr_loss / nb_tr_examples))
         
         # Evaluate the model f-1
-        print("Testing {}".format(epoch))
-        f1_test = test(eval_dataloader, classifier, encoder, device)
-        f1_train = test(train_dataloader, classifier, encoder, device)
-        logger.info('F1 score at epoch %d | train: %.5f | test: %.5f' % (epoch+1, f1_test, f1_train))
+        # print("Testing {}".format(epoch))
+        # f1_test = test(eval_dataloader, classifier, encoder, device)
+        # f1_train = test(train_dataloader, classifier, encoder, device)
+        # logger.info('F1 score at epoch %d | train: %.5f | test: %.5f' % (epoch+1, f1_test, f1_train))
 
         if epoch % 1 == 0:
             # Save Model Checkpoint
