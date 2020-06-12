@@ -7,6 +7,8 @@ import argparse
 import collections
 import re
 import json
+import random
+import os
 import numpy as np
 from tqdm import tqdm, trange
 import logging
@@ -14,9 +16,11 @@ import logging
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset, RandomSampler
+from torch.utils.data import DataLoader, Dataset, RandomSampler, random_split
 from transformers import BertModel, BertTokenizer
 from classifier import logisticRegressionClassifier
+
+from sklearn.metrics import f1_score
 
 log_level = logging.INFO
 logger = logging.getLogger()
@@ -26,7 +30,6 @@ handler.setLevel(log_level)
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-
 
 SEP_TOKEN = "[SEP]"
 
@@ -117,17 +120,50 @@ class PPDBDataset(Dataset):
         train_tensor = (X.squeeze(), X_mask.squeeze(), torch.tensor(label))
         return train_tensor
 
+def test(dataloader, classifier, encoder, device):
+    classifier.eval()
+    y_true, y_pred = [], []
+    for step,  (X, X_mask, labels) in enumerate(dataloader):
+        X = X.to(device)
+        X_mask = X_mask.to(device)
+        # BERT Encoder
+        output = encoder(X, attention_mask = X_mask)
+        inputs = cls_featurizer(output) # cls_token
+        inputs = inputs.to(device)
+        outputs = classifier(inputs)
+        y_true.extend(list(labels.numpy()))
+        pred = torch.argmax(outputs, dim=1).numpy()
+        y_pred.extend(list(pred))
+    # Compute F1 Score
+    score = f1_score(y_true, y_pred, average='macro')
+
+    classifier.train()
+    return score
+
+
 def train(dataset,
           classifier, 
           encoder,
+          path = "./model_checkpoint",
           epochs=100, 
           lr=0.01,
-          batch_size=512):
+          batch_size=1024,
+          ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using {device} for training")
     # Construct PyTorch DataLoader
-    train_sampler = RandomSampler(train_dataset)
-    train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch_size)
+    train_test_split = [int(len(dataset) * 0.8), len(dataset) - int(len(dataset) * 0.8)]
+    train_set, val_set = torch.utils.data.random_split(dataset, train_test_split)
+
+    train_dataloader = DataLoader(train_set, 
+        sampler=RandomSampler(train_set), 
+        batch_size=batch_size,
+        num_workers = 4)
+
+    eval_dataloader = DataLoader(val_set, 
+        sampler=RandomSampler(val_set),
+        batch_size=batch_size,
+        num_workers = 4)
 
     loss_function = nn.NLLLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -135,6 +171,10 @@ def train(dataset,
     classifier.to(device)
     encoder.to(device)
     classifier.train()
+
+    # Setup train loss, eval loss tracking every epoch
+    train_loss = []
+    # eval_loss = [] 
     for epoch in trange(epochs, desc='Epochs'):
         tr_loss = 0.
         nb_tr_examples, nb_tr_steps = 0, 0
@@ -142,24 +182,48 @@ def train(dataset,
             X = X.to(device)
             X_mask = X_mask.to(device)
             # BERT Encoder
+            test(eval_dataloader, classifier, encoder, device=device)
+
             output = encoder(X, attention_mask = X_mask)
 
             inputs = cls_featurizer(output) # cls_token
 
             inputs = inputs.to(device)
             labels = labels.to(device)
-            outputs = classifier(inputs)
             classifier.zero_grad()
+            outputs = classifier(inputs)
             loss = loss_function(outputs, labels)
             loss.backward()
             optimizer.step()
             tr_loss += loss.item()
             nb_tr_examples += inputs.size(0)
             nb_tr_steps += 1
-        logger.info('Total loss at epoch %d: %.5f' % (epoch, tr_loss))
-        logger.info('Avrg  loss at epoch %d: %.5f' % (epoch, tr_loss / nb_tr_examples))
+            train_loss.append((loss.item(), nb_tr_steps))
+
+        logger.info('Total loss at epoch %d: %.5f' % (epoch+1, tr_loss))
+        logger.info('Avrg  loss at epoch %d: %.5f' % (epoch+1, tr_loss / nb_tr_examples))
+        
+        # Evaluate the model f-1
+        f1_test = test(eval_dataloader, classifier, encoder, device)
+        f1_train = test(train_dataloader, classifier, encoder, device)
+        logger.info('F1 score at epoch %d | train: %.5f | test: %.5f' % (epoch+1, f1_test, f1_train))
+
+        if epoch % 1 == 0:
+            # Save Model Checkpoint
+            torch.save(model.state_dict(), os.path.join(
+                path, f'{classifier.__name__}-{epoch+1}'))
+
+    # Write train loss per step      
+    with open('train_loss_per_step.json', 'w+', encoding='utf-8') as f:
+        json.dump(train_loss, f)
 
 if __name__ == "__main__":
+    # Set Seed
+    random_seed = 42
+    random.seed(random_seed)
+    np.random.seed(random_seed)
+    torch.manual_seed(random_seed)
+
     hf_weights_name = 'bert-base-uncased'
     bert_tokenizer = BertTokenizer.from_pretrained(hf_weights_name)
     bert_model = BertModel.from_pretrained(hf_weights_name)
