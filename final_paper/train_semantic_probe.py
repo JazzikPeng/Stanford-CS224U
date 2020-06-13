@@ -22,6 +22,8 @@ from classifier import logisticRegressionClassifier
 
 from sklearn.metrics import f1_score
 
+from utils import write_to_json_file, create_directory
+
 log_level = logging.INFO
 logger = logging.getLogger()
 logger.setLevel(log_level)
@@ -199,25 +201,31 @@ def train(dataset,
             tr_loss += loss.item()
             nb_tr_examples += inputs.size(0)
             nb_tr_steps += 1
-            train_loss.append((loss.item(), nb_tr_steps))
+            train_loss.append((loss.item(), nb_tr_steps))   
 
         logger.info('Total loss at epoch %d: %.5f' % (epoch+1, tr_loss))
         logger.info('Avrg  loss at epoch %d: %.5f' % (epoch+1, tr_loss / nb_tr_examples))
         
         # Evaluate the model f-1
+        # import time
+        # start = time.start()
         # print("Testing {}".format(epoch))
         # f1_test = test(eval_dataloader, classifier, encoder, device)
         # f1_train = test(train_dataloader, classifier, encoder, device)
         # logger.info('F1 score at epoch %d | train: %.5f | test: %.5f' % (epoch+1, f1_test, f1_train))
+        # end = time.end()
+        # print(f"Test cost {end-start}")
 
         if epoch % 1 == 0:
             # Save Model Checkpoint
+            create_directory(path)
             torch.save(model.state_dict(), os.path.join(
-                path, f'{classifier.__name__}-{epoch+1}'))
+                path, f'{type(classifier).__name__}-{epoch+1}'))
+
 
     # Write train loss per step      
-    with open('train_loss_per_step.json', 'w+', encoding='utf-8') as f:
-        json.dump(train_loss, f)
+    write_to_json_file("train_loss_per_step", train_loss)
+
 
 if __name__ == "__main__":
     # Set Seed
@@ -235,9 +243,9 @@ if __name__ == "__main__":
                         tokenizer=bert_tokenizer,
                         encoder=bert_model,
                         seq_len=128)
-    model = logisticRegressionClassifier(2, input_dim=768)
 
-    train(train_dataset, model, encoder=bert_model)
+    model = logisticRegressionClassifier(2, input_dim=768)
+    train(train_dataset, model, encoder=bert_model, epochs=1)
 
 
 
