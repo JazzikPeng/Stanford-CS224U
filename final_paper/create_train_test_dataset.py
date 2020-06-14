@@ -33,7 +33,6 @@ if __name__ == "__main__":
                         required=True,
                         help="The input ppdb pairs.")
 
-        parser = argparse.ArgumentParser()
     parser.add_argument("--lengths",
                         default=None,
                         type=list,
