@@ -15,5 +15,6 @@ class logisticRegressionClassifier(nn.Module):  # inheriting from nn.Module!
 
     def forward(self, feature_vec):
         return F.log_softmax(self.linear(feature_vec), dim=1)
+        # return self.linear(feature_vec)
 
     

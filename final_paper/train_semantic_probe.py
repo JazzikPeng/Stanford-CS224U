@@ -7,8 +7,9 @@ import argparse
 import collections
 import re
 import json
-import random
 import os
+import random
+import time
 import numpy as np
 from tqdm import tqdm, trange
 import logging
@@ -21,7 +22,6 @@ from transformers import BertModel, BertTokenizer
 from classifier import logisticRegressionClassifier
 
 from sklearn.metrics import f1_score
-
 from utils import write_to_json_file, create_directory
 
 log_level = logging.INFO
@@ -81,6 +81,27 @@ def cls_featurizer(encoder_output):
     final_hidden_state, cls_output = encoder_output
     return cls_output
 
+def test(dataloader, classifier, encoder, device):
+    classifier.eval()
+    y_true, y_pred = [], []
+    for step,  (X, X_mask, labels) in enumerate(tqdm(dataloader, desc="Iteration")):
+        X = X.to(device)
+        X_mask = X_mask.to(device)
+        # BERT Encoder
+        output = encoder(X, attention_mask = X_mask)
+        inputs = cls_featurizer(output) # cls_token
+        inputs = inputs.to(device)
+        outputs = classifier(inputs)
+        y_true.extend(list(labels.numpy()))
+        pred = torch.argmax(outputs, dim=1).detach().cpu().numpy()
+        # print("load pred", pred)
+        y_pred.extend(list(pred))
+    classifier.train()
+    # Compute F1 Score
+    f1 = f1_score(y_true, y_pred, average='macro')
+    acc = accuracy_score(y_true, y_pred)
+    return f1, acc
+
 class PPDBDataset(Dataset):
     def __init__(self, corpus_path: str, tokenizer: BertTokenizer, encoder: BertModel, 
         seq_len: int, encoding: str = 'utf-8'):
@@ -121,28 +142,6 @@ class PPDBDataset(Dataset):
         # train_tensor = (feat.squeeze(), torch.tensor(label))
         train_tensor = (X.squeeze(), X_mask.squeeze(), torch.tensor(label))
         return train_tensor
-
-def test(dataloader, classifier, encoder, device):
-    classifier.eval()
-    y_true, y_pred = [], []
-    for step,  (X, X_mask, labels) in enumerate(dataloader):
-        X = X.to(device)
-        X_mask = X_mask.to(device)
-        # BERT Encoder
-        output = encoder(X, attention_mask = X_mask)
-        inputs = cls_featurizer(output) # cls_token
-        inputs = inputs.to(device)
-        outputs = classifier(inputs)
-        y_true.extend(list(labels.numpy()))
-        pred = torch.argmax(outputs, dim=1).cpu().numpy()
-        print("load pred", pred)
-        y_pred.extend(list(pred))
-    # Compute F1 Score
-    score = f1_score(y_true, y_pred, average='macro')
-
-    classifier.train()
-    return score
-
 
 def train(dataset,
           classifier, 
@@ -207,14 +206,14 @@ def train(dataset,
         logger.info('Avrg  loss at epoch %d: %.5f' % (epoch+1, tr_loss / nb_tr_examples))
         
         # Evaluate the model f-1
-        # import time
-        # start = time.start()
-        # print("Testing {}".format(epoch))
-        # f1_test = test(eval_dataloader, classifier, encoder, device)
-        # f1_train = test(train_dataloader, classifier, encoder, device)
-        # logger.info('F1 score at epoch %d | train: %.5f | test: %.5f' % (epoch+1, f1_test, f1_train))
-        # end = time.end()
-        # print(f"Test cost {end-start}")
+        start = time.start()
+        print("Testing {}".format(epoch))
+        f1_test, acc_test = test(eval_dataloader, classifier, encoder, device)
+        f1_train, acc_train = test(train_dataloader, classifier, encoder, device)
+        logger.info('[F1, Accuracy] score at epoch %d | train: (%.5f, %.5f) | test: (%.5f, %.5f)' \
+            % (epoch+1, f1_test, f1_train, acc_test, acc_train))
+        end = time.end()
+        if epoch == 0: print(f"Test cost {end-start}")
 
         if epoch % 1 == 0:
             # Save Model Checkpoint
@@ -239,7 +238,7 @@ if __name__ == "__main__":
     bert_model = BertModel.from_pretrained(hf_weights_name)
     for param in bert_model.parameters():
         param.requires_grad = False
-    train_dataset = PPDBDataset(corpus_path='./data/ppdb_mix',
+    train_dataset = PPDBDataset(corpus_path='./data/ppdb_train',
                         tokenizer=bert_tokenizer,
                         encoder=bert_model,
                         seq_len=128)
