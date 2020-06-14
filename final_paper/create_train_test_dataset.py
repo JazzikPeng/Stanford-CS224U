@@ -33,13 +33,20 @@ if __name__ == "__main__":
                         required=True,
                         help="The input ppdb pairs.")
 
-    parser.add_argument("--lengths",
+    parser.add_argument("--train_size",
                         default=None,
-                        type=list,
+                        type=int,
                         required=True,
-                        help="Number of [train_sample, test_sample]")
+                        help="Number of train sample")
+    
+    parser.add_argument("--test_size",
+                    default=None,
+                    type=int,
+                    required=True,
+                    help="Number of test sample")
+                    
 
     args = parser.parse_args()
 
-    train_path, test_path = resample_train_test(args.data_path, args.lengths)
+    train_path, test_path = resample_train_test(args.data_path, [args.train_size, args.test_size])
     print(f"Save train, test data at {train_path}, {test_path}")
