@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader, Dataset, RandomSampler, random_split
 from transformers import BertModel, BertTokenizer
 from classifier import logisticRegressionClassifier
 
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 from utils import write_to_json_file, create_directory
 
 log_level = logging.INFO
