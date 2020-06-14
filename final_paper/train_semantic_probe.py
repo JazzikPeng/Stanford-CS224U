@@ -244,7 +244,7 @@ if __name__ == "__main__":
                         seq_len=128)
 
     model = logisticRegressionClassifier(2, input_dim=768)
-    train(train_dataset, model, encoder=bert_model, epochs=1)
+    train(train_dataset, model, encoder=bert_model, epochs=20)
 
 
 
