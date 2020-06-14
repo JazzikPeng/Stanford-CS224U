@@ -206,13 +206,13 @@ def train(dataset,
         logger.info('Avrg  loss at epoch %d: %.5f' % (epoch+1, tr_loss / nb_tr_examples))
         
         # Evaluate the model f-1
-        start = time.start()
+        start = time.time()
         print("Testing {}".format(epoch))
         f1_test, acc_test = test(eval_dataloader, classifier, encoder, device)
         f1_train, acc_train = test(train_dataloader, classifier, encoder, device)
         logger.info('[F1, Accuracy] score at epoch %d | train: (%.5f, %.5f) | test: (%.5f, %.5f)' \
             % (epoch+1, f1_test, f1_train, acc_test, acc_train))
-        end = time.end()
+        end = time.time()
         if epoch == 0: print(f"Test cost {end-start}")
 
         if epoch % 1 == 0:
