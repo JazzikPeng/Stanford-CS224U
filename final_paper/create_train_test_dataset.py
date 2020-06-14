@@ -24,4 +24,23 @@ def resample_train_test(data_path: str, lengths: [int, int]) -> [str, str]:
     return train_path, test_path
 
 if __name__ == "__main__":
-    print(resample_train_test("./data/ppdb_mix", [10000, 2000]))
+    parser = argparse.ArgumentParser()
+
+    ## Required parameters
+    parser.add_argument("--data_path",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="The input ppdb pairs.")
+
+        parser = argparse.ArgumentParser()
+    parser.add_argument("--lengths",
+                        default=None,
+                        type=list,
+                        required=True,
+                        help="Number of [train_sample, test_sample]")
+
+    args = parser.parse_args()
+
+    train_path, test_path = resample_train_test(args.data_path, args.lengths)
+    print(f"Save train, test data at {train_path}, {test_path}")
