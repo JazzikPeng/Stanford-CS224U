@@ -23,6 +23,7 @@ from classifier import logisticRegressionClassifier
 
 from sklearn.metrics import f1_score, accuracy_score
 from utils import write_to_json_file, create_directory
+from featurizer import cls_featurizer
 
 log_level = logging.INFO
 logger = logging.getLogger()
@@ -76,10 +77,6 @@ def create_train_data():
     #     bert_final_hidden_states, cls_output = bert_model(
     #         X, attention_mask = X_mask)
 
-def cls_featurizer(encoder_output):
-    """Construct Features From BERT.forward() ouput"""
-    final_hidden_state, cls_output = encoder_output
-    return cls_output
 
 def test(dataloader, classifier, encoder, device):
     classifier.eval()
@@ -146,6 +143,7 @@ class PPDBDataset(Dataset):
 def train(dataset,
           classifier, 
           encoder,
+          featurizer=cls_featurizer,
           path = "./model_checkpoint",
           epochs=100, 
           lr=0.01,
@@ -188,7 +186,7 @@ def train(dataset,
             with torch.no_grad():
                 output = encoder(X, attention_mask = X_mask)
 
-            inputs = cls_featurizer(output) # cls_token
+            inputs = featurizer(output) # cls_token
 
             inputs = inputs.to(device)
             labels = labels.to(device)
