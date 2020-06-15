@@ -11,3 +11,4 @@ ppdb_train
 # Ignore data
 final_paper/data
 logistic_regression_classifier.log
+final_paper/serialized_data
