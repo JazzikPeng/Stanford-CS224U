@@ -187,7 +187,7 @@ def train(dataset,
                 path, f"{file_name_head}-{epoch+1}"))
     # Write train loss per step      
     write_to_json_file(os.path.join(path,
-        f"{file_name_head}_train_loss_per_epoch", train_loss))
+        f"{file_name_head}_train_loss_per_epoch"), train_loss)
 
 
 if __name__ == "__main__":
