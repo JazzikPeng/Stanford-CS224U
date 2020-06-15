@@ -140,7 +140,7 @@ def train(dataset,
 
     # Setup train loss, eval loss tracking every epoch
     train_loss = []
-    file_name_head = "{type(encoder).__name__}-{featurizer.__name__}-{type(classifier).__name__}"
+    file_name_head = f"{type(encoder).__name__}-{featurizer.__name__}-{type(classifier).__name__}"
     # eval_loss = [] 
     for epoch in trange(epochs, desc='Epochs'):
         tr_loss = 0.
