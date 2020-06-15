@@ -1,0 +1,257 @@
+[
+    {
+        "text1": "to the conditions provided by",
+        "text2": "under the conditions laid down by",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "address of the individual",
+        "text2": "address of the person",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "the calories of the",
+        "text2": "recommendations of the board of",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "been improving",
+        "text2": "an improvement of",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "filthy and humanitarian",
+        "text2": "civil and humanitarian",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "rights , duties",
+        "text2": "rights , responsibilities",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "the ship was",
+        "text2": "the vessel is",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "deep appreciation to",
+        "text2": "its appreciation to",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "the verify has",
+        "text2": "implementation has",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "are coming for",
+        "text2": "'ve come for",
+        "relationship": "ForwardEntailment"
+    },
+    {
+        "text1": "experience budgets",
+        "text2": "create difficulties",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "other wages . ``",
+        "text2": "another country .",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "president of the bomber of",
+        "text2": "speaker of the house of",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "under the universal conditions as",
+        "text2": "on the same conditions as",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "crafts those",
+        "text2": "appoint those",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "recommendations financed",
+        "text2": "should recommend to",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "first isolated",
+        "text2": "began with",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "the purpose is",
+        "text2": "its objective is",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "'s activities in",
+        "text2": "the activities in",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "the legal story of",
+        "text2": "the legal effects of",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "daily thought",
+        "text2": "daily newspaper",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "- i authorise not",
+        "text2": "- no , we 're not",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "is launchers",
+        "text2": "'s yes",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "since there crossed",
+        "text2": "because there 's",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "peril notes with concern the",
+        "text2": "committee is concerned by the",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "'ve become",
+        "text2": "was to become",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "has decreased since",
+        "text2": "has diminished since",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "attempts also difficult",
+        "text2": "is hard",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "forty-eighth activities",
+        "text2": "science activities",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "is a major factor",
+        "text2": "is a significant factor",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "already identified",
+        "text2": ", identified",
+        "relationship": "ForwardEntailment"
+    },
+    {
+        "text1": "million people of",
+        "text2": "000 people are",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "a better understanding between",
+        "text2": "greater understanding between",
+        "relationship": "ForwardEntailment"
+    },
+    {
+        "text1": "now allows",
+        "text2": "has existed",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "chairman noted",
+        "text2": "chairman stated",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "upper principle",
+        "text2": "key principle",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "were applicable",
+        "text2": "to be applied",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "kindly requested to",
+        "text2": "asked to",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "tellin, and health",
+        "text2": "educational , health",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "general co-operate held",
+        "text2": "election is",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "you talkin the best",
+        "text2": "you 're the best",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "the aid notes with appreciation",
+        "text2": "it notes with satisfaction",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "in the development of new",
+        "text2": "in developing new",
+        "relationship": "ForwardEntailment"
+    },
+    {
+        "text1": "no , do n't",
+        "text2": "i did n't lie",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "seemed to be",
+        "text2": "seems to be",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "should like to south",
+        "text2": "would like to begin",
+        "relationship": "Negative"
+    },
+    {
+        "text1": "the need for strengthening",
+        "text2": "the importance of strengthening",
+        "relationship": "ReverseEntailment"
+    },
+    {
+        "text1": "n't feel so",
+        "text2": "n't feel very",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "that measures",
+        "text2": "that the measurements",
+        "relationship": "Equivalence"
+    },
+    {
+        "text1": "is submitted to",
+        "text2": "are presented in",
+        "relationship": "ForwardEntailment"
+    },
+    {
+        "text1": "we 're talking about here",
+        "text2": "we 're talking",
+        "relationship": "ForwardEntailment"
+    }
+]
