@@ -22,13 +22,14 @@ from transformers import BertModel, BertTokenizer
 from classifier import logisticRegressionClassifier
 
 from sklearn.metrics import f1_score, accuracy_score
-from utils import write_to_json_file, create_directory
-from featurizer import cls_featurizer
+from utils import write_to_json_file, create_directory, fix_random_seeds
+import featurizer
 
+TIMESTAMP = time.time()
 log_level = logging.INFO
 logger = logging.getLogger()
 logger.setLevel(log_level)
-handler = logging.FileHandler("logistic_regression_classifier.log")
+handler = logging.FileHandler("./log/train_semantic_probe_{}.log".format(TIMESTAMP))
 handler.setLevel(log_level)
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
 handler.setFormatter(formatter)
@@ -42,43 +43,8 @@ def convert_ppdb_pairs_to_input_text(pair):
     text = text1 + " " + SEP_TOKEN + " "+ text2
     return text, label
 
-def create_train_data():
-    """Create data for training classifier"""
-    with open('./data/ppdb_mix', mode='r', encoding='utf-8') as fp:
-        ppdb_pairs = json.load(fp)
-        ppdb_size = len(ppdb_pairs)
-        print(f"load {ppdb_size} ppdb negative pairs")
 
-    hf_weights_name = 'bert-base-uncased'
-    bert_tokenizer = BertTokenizer.from_pretrained(hf_weights_name)
-    bert_model = BertModel.from_pretrained(hf_weights_name)
-
-    # Random shuffle ppdb_pairs
-    ppdb_pairs = np.array(ppdb_pairs)
-    np.random.shuffle(ppdb_pairs)
-
-    input_text = []
-    labels = []
-    for pair in ppdb_pairs:
-        text, label = convert_ppdb_pairs_to_input_text(pair)
-        input_text.append(text)
-        labels.append(label)
-
-    return input_text, labels
-    # bert_ids = bert_tokenizer.batch_encode_plus(input_text, 
-    #                                             add_special_tokens=True,
-    #                                             return_attention_masks=True,
-    #                                             pad_to_max_length=True)
-
-    # X = torch.tensor(bert_ids['input_ids'])
-    # X_mask = torch.tensor(bert_ids['attention_mask'])
-
-    # with torch.no_grad():
-    #     bert_final_hidden_states, cls_output = bert_model(
-    #         X, attention_mask = X_mask)
-
-
-def test(dataloader, classifier, encoder, device):
+def test(dataloader, classifier, featurizer, encoder, device):
     classifier.eval()
     y_true, y_pred = [], []
     for step,  (X, X_mask, labels) in enumerate(tqdm(dataloader, desc="Iteration")):
@@ -86,7 +52,7 @@ def test(dataloader, classifier, encoder, device):
         X_mask = X_mask.to(device)
         # BERT Encoder
         output = encoder(X, attention_mask = X_mask)
-        inputs = cls_featurizer(output) # cls_token
+        inputs = featurizer(output) # cls_token
         inputs = inputs.to(device)
         outputs = classifier(inputs)
         y_true.extend(list(labels.numpy()))
@@ -143,7 +109,7 @@ class PPDBDataset(Dataset):
 def train(dataset,
           classifier, 
           encoder,
-          featurizer=cls_featurizer,
+          featurizer,
           path = "./model_checkpoint",
           epochs=100, 
           lr=0.01,
@@ -174,6 +140,7 @@ def train(dataset,
 
     # Setup train loss, eval loss tracking every epoch
     train_loss = []
+    file_name_head = "{type(encoder).__name__}-{featurizer.__name__}-{type(classifier).__name__}"
     # eval_loss = [] 
     for epoch in trange(epochs, desc='Epochs'):
         tr_loss = 0.
@@ -206,8 +173,8 @@ def train(dataset,
         # Evaluate the model f-1
         start = time.time()
         print("Testing {}".format(epoch))
-        f1_test, acc_test = test(eval_dataloader, classifier, encoder, device)
-        f1_train, acc_train = test(train_dataloader, classifier, encoder, device)
+        f1_test, acc_test = test(eval_dataloader, classifier, featurizer, encoder, device)
+        f1_train, acc_train = test(train_dataloader, classifier, featurizer, encoder, device)
         logger.info('[F1, Accuracy] score at epoch %d | train: (%.5f, %.5f) | test: (%.5f, %.5f)' \
             % (epoch+1, f1_test, f1_train, acc_test, acc_train))
         end = time.time()
@@ -217,33 +184,56 @@ def train(dataset,
             # Save Model Checkpoint
             create_directory(path)
             torch.save(model.state_dict(), os.path.join(
-                path, f'{type(classifier).__name__}-{epoch+1}'))
-
-
+                path, f"{file_name_head}-{epoch+1}"))
     # Write train loss per step      
-    write_to_json_file("train_loss_per_step", train_loss)
+    write_to_json_file(f"{file_name_head}_train_loss_per_epoch", train_loss)
 
 
 if __name__ == "__main__":
     # Set Seed
-    random_seed = 42
-    random.seed(random_seed)
-    np.random.seed(random_seed)
-    torch.manual_seed(random_seed)
+    fix_random_seeds(seed=42)
+    parser = argparse.ArgumentParser()
+    ## Required parameters
+    parser.add_argument("--data_path",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="The input ppdb pairs.")
+
+    parser.add_argument("--featurizer",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="Featurizer used applied on BERT output")
+    
+    parser.add_argument("--epochs",
+                    default=20,
+                    type=int,
+                    required=False,
+                    help="Number of Epochs")
+
+    args = parser.parse_args()
+    
+    if args.featurizer == "cls_featurizer":
+        feat = featurizer.cls_featurizer
+    elif args.featurizer == "avg_pooling_featurizer":
+        feat = featurizer.avg_pooling_featurizer
+    else:
+        raise ValueError("Please enter name of existing featurizer")
 
     hf_weights_name = 'bert-base-uncased'
     bert_tokenizer = BertTokenizer.from_pretrained(hf_weights_name)
     bert_model = BertModel.from_pretrained(hf_weights_name)
     for param in bert_model.parameters():
         param.requires_grad = False
-    train_dataset = PPDBDataset(corpus_path='./data/ppdb_train',
+
+    train_dataset = PPDBDataset(corpus_path=args.data_path,
                         tokenizer=bert_tokenizer,
                         encoder=bert_model,
-                        seq_len=128)
+                        seq_len=128) # max seq_length is 129, 128 is appropriate length
 
     model = logisticRegressionClassifier(2, input_dim=768)
-    train(train_dataset, model, encoder=bert_model, epochs=20)
-
+    train(train_dataset, model, encoder=bert_model, featurizer=feat, epochs=args.epochs)
 
 
 
