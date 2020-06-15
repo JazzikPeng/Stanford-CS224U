@@ -89,12 +89,12 @@ def fix_random_seeds(
             torch.backends.cudnn.benchmark = False
 
     # set tf seed
-    if set_tensorflow:
-        try:
-            from tensorflow.compat.v1 import set_random_seed as set_tf_seed
-        except ImportError:
-            from tensorflow.random import set_seed as set_tf_seed
-        except ImportError:
-            pass
-        else:
-            set_tf_seed(seed)
+    # if set_tensorflow:
+    #     try:
+    #         from tensorflow.compat.v1 import set_random_seed as set_tf_seed
+    #     except ImportError:
+    #         from tensorflow.random import set_seed as set_tf_seed
+    #     except ImportError:
+    #         pass
+    #     else:
+    #         set_tf_seed(seed)
