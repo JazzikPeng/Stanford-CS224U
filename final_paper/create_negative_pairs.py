@@ -14,14 +14,12 @@ import nltk
 import numpy as np 
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 
-np.random.seed(seed=42)
+fix_random_seeds(seed=42)
 
 PPDBExample = collections.namedtuple('PPDBExample', 'text1 text2 relationship')
 # Tags to replace for negative pairs
 TAG_LIST = ["VBN", "NN", "JJ", "VBP", "VB", "VBZ", "RB", "NNS", "VBG", "CD", "VBD"]
 
-tags_dict = collections.defaultdict(set)
-corpus_path = "./data/ppdb_train"
 
 def replace_vocab(pair: PPDBExample, binary_random_num: int, tags_dict=tags_dict) -> Union[PPDBExample, int]:
     """
@@ -56,31 +54,33 @@ def write_examples_to_json_file(file_path: str, examples: [PPDBExample]) -> None
     json.dump(examples, fp, indent=4)
     fp.close()
 
+if __name__ == "__main__":
+    tags_dict = collections.defaultdict(set)
+    corpus_path = "./data/ppdb_train"
+    with open(corpus_path, mode='r', encoding='utf-8') as fp:
+        ppdb_pairs = json.load(fp)
+        ppdb_size = len(ppdb_pairs)
+        print(f"load {ppdb_size} ppdb pairs")
 
-with open(corpus_path, mode='r', encoding='utf-8') as fp:
-    ppdb_pairs = json.load(fp)
-    ppdb_size = len(ppdb_pairs)
-    print(f"load {ppdb_size} ppdb pairs")
+    # Create POS dictionary
+    for pair in tqdm(ppdb_pairs):
+        text1, text2, rel = pair['text1'], pair['text2'], pair['relationship']
+        token = nltk.word_tokenize(text1)
+        pos_tag = nltk.pos_tag(token)
+        
+        token = nltk.word_tokenize(text2)
+        pos_tag.extend(nltk.pos_tag(token))
+        # print(pos_tag)
+        _ = [tags_dict[tag].add(vocab) for vocab, tag in pos_tag]
 
-# Create POS dictionary
-for pair in tqdm(ppdb_pairs):
-    text1, text2, rel = pair['text1'], pair['text2'], pair['relationship']
-    token = nltk.word_tokenize(text1)
-    pos_tag = nltk.pos_tag(token)
-    
-    token = nltk.word_tokenize(text2)
-    pos_tag.extend(nltk.pos_tag(token))
-    # print(pos_tag)
-    _ = [tags_dict[tag].add(vocab) for vocab, tag in pos_tag]
+    # Replace vocabulary randomly with the same POS tags to create negative pair
+    negative_size = ppdb_size
+    negative_pairs = []
+    for idx in tqdm(range(negative_size)):
+        pair = ppdb_pairs[idx]
+        negative_pair1 = replace_vocab(pair, 0, tags_dict=tags_dict)
+        negative_pair2 = replace_vocab(pair, 1, tags_dict=tags_dict)
+        if negative_pair1: negative_pairs.append(negative_pair1)
+        if negative_pair2: negative_pairs.append(negative_pair2)
 
-# Replace vocabulary randomly with the same POS tags to create negative pair
-negative_size = ppdb_size
-negative_pairs = []
-for idx in tqdm(range(negative_size)):
-    pair = ppdb_pairs[idx]
-    negative_pair1 = replace_vocab(pair, 0, tags_dict=tags_dict)
-    negative_pair2 = replace_vocab(pair, 1, tags_dict=tags_dict)
-    if negative_pair1: negative_pairs.append(negative_pair1)
-    if negative_pair2: negative_pairs.append(negative_pair2)
-
-write_examples_to_json_file("./data/ppdb_negative", negative_pairs)
+    write_examples_to_json_file("./data/ppdb_negative", negative_pairs)

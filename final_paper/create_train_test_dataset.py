@@ -12,7 +12,7 @@ def resample_train_test(data_path: str, lengths: [int, int]) -> [str, str]:
     with open(data_path, mode='r', encoding='utf-8') as fp:
         ppdb_pairs = json.load(fp)
         ppdb_size = len(ppdb_pairs)
-        print(f"load {ppdb_size} ppdb mix pairs")
+        print(f"load {ppdb_size} ppdb pairs")
     train_size, test_size = lengths[0], lengths[1]
     train_pairs = list(np.random.choice(ppdb_pairs, train_size, replace=False))
     test_pairs = list(np.random.choice(ppdb_pairs, test_size, replace=True))
