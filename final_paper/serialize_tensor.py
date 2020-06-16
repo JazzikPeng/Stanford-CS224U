@@ -5,12 +5,13 @@ from train_semantic_probe import *
 
 def serialize(dataset,
               encoder,
+              featurizer,
               path = "./serialized_data",
               featurizer = cls_featurizer,
               batch_size=10240,
             ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using {device} for training")
+    print(f"Using {device} for serializing")
     # Construct PyTorch DataLoader
     dataloader = DataLoader(dataset, 
         shuffle=False,
@@ -35,16 +36,46 @@ def serialize(dataset,
         np.save(os.path.join(path, tensor_name), inputs)
     
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    ## Required parameters
+    parser.add_argument("--data_path",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="The input ppdb pairs.")
+
+    parser.add_argument("--featurizer",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="Featurizer used applied on BERT output")
+    
+    parser.add_argument("--output_dir",
+                    type=str,
+                    required=True,
+                    help="Directory to save serialized data")
+
+    args = parser.parse_args()
+
+    if args.featurizer == "cls_featurizer":
+        feat = featurizer.cls_featurizer
+    elif args.featurizer == "avg_pooling_featurizer":
+        feat = featurizer.avg_pooling_featurizer
+    else:
+        raise ValueError("Please enter name of existing featurizer")
+
+    create_directory(args.output_dir)
+
     hf_weights_name = 'bert-base-uncased'
     bert_tokenizer = BertTokenizer.from_pretrained(hf_weights_name)
     bert_model = BertModel.from_pretrained(hf_weights_name)
     for param in bert_model.parameters():
         param.requires_grad = False
-    train_dataset = PPDBDataset(corpus_path='./data/ppdb_train',
+    train_dataset = PPDBDataset(corpus_path=args.data_path,
                         tokenizer=bert_tokenizer,
                         encoder=bert_model,
                         seq_len=128)
 
-    serialize(train_dataset, encoder=bert_model)
+    serialize(train_dataset, encoder=bert_model, featurizer=feat)
 
 
