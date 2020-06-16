@@ -7,7 +7,6 @@ def serialize(dataset,
               encoder,
               featurizer,
               path = "./serialized_data",
-              featurizer = cls_featurizer,
               batch_size=10240,
             ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
