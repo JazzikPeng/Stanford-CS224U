@@ -75,6 +75,6 @@ if __name__ == "__main__":
                         encoder=bert_model,
                         seq_len=128)
 
-    serialize(train_dataset, encoder=bert_model, featurizer=feat)
+    serialize(train_dataset, encoder=bert_model, featurizer=feat, path=args.output_dir)
 
 
