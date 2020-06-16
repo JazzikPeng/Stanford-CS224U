@@ -7,14 +7,14 @@ def serialize(dataset,
               encoder,
               featurizer,
               path = "./serialized_data",
-              batch_size=10240,
+              batch_size=25600,
             ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using {device} for serializing")
     # Construct PyTorch DataLoader
     dataloader = DataLoader(dataset, 
         shuffle=False,
-        batch_size=1024,
+        batch_size=batch_size,
         num_workers = 4)
 
     total_step = len(dataloader)
@@ -54,6 +54,12 @@ if __name__ == "__main__":
                     required=True,
                     help="Directory to save serialized data")
 
+    parser.add_argument("--tensor_size",
+                default = 25600,
+                type=int,
+                required=False,
+                help="Number of sample per array saved")
+    
     args = parser.parse_args()
 
     if args.featurizer == "cls_featurizer":
@@ -75,6 +81,7 @@ if __name__ == "__main__":
                         encoder=bert_model,
                         seq_len=128)
 
-    serialize(train_dataset, encoder=bert_model, featurizer=feat, path=args.output_dir)
+    serialize(train_dataset, encoder=bert_model, 
+        featurizer=feat, path=args.output_dir, batch_size=args.tensor_size)
 
 
