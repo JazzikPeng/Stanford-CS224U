@@ -29,11 +29,12 @@ def serialize(dataset,
         with torch.no_grad():
             output = encoder(X, attention_mask = X_mask)
 
-        inputs = featurizer(output) # cls_token
+        inputs = featurizer(output) 
         tensor_name = f"{featurizer.__name__}-{step}"
         inputs = inputs.detach().cpu().numpy()
-        np.save(os.path.join(path, tensor_name), inputs)
-    
+        sample = np.array([inputs, labels]) 
+        np.save(os.path.join(path, tensor_name), sample)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     ## Required parameters

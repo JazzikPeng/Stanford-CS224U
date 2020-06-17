@@ -78,7 +78,7 @@ class PPDBDataset(Dataset):
         self.pair_counter = 0 
         self.count = 0
 
-        with open(corpus_path, mode='r', encoding='utf-8') as fp:
+        with open(corpus_path, mode='r', encoding=self.encoding) as fp:
             self.ppdb_pairs = json.load(fp)
             self.count = len(self.ppdb_pairs)
     
