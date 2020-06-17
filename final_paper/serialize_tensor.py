@@ -17,7 +17,7 @@ def serialize(dataset,
         batch_size=batch_size,
         num_workers = 4)
 
-    total_step = len(dataloader)
+    total_step = len(dataset)
     encoder.to(device)
 
     # Serialize data
