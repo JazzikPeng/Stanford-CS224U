@@ -12,3 +12,6 @@ ppdb_train
 final_paper/data
 logistic_regression_classifier.log
 final_paper/serialized_data
+model_checkpoint
+serialized_data*
+*.tar.gz

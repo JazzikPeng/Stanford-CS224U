@@ -51,8 +51,10 @@ def test(dataloader, classifier, featurizer, encoder, device):
         X = X.to(device)
         X_mask = X_mask.to(device)
         # BERT Encoder
-        output = encoder(X, attention_mask = X_mask)
-        inputs = featurizer(output) # cls_token
+        with torch.no_grad():
+            final_hidden_states, cls_output = encoder(X, attention_mask = X_mask)
+
+        inputs = featurizer(final_hidden_states) 
         inputs = inputs.to(device)
         outputs = classifier(inputs)
         y_true.extend(list(labels.numpy()))
@@ -151,9 +153,9 @@ def train(dataset,
             X_mask = X_mask.to(device)
             # BERT Encoder
             with torch.no_grad():
-                output = encoder(X, attention_mask = X_mask)
+                final_hidden_states, cls_output = encoder(X, attention_mask = X_mask)
 
-            inputs = featurizer(output) # cls_token
+            inputs = featurizer(final_hidden_states) # cls_token
 
             inputs = inputs.to(device)
             labels = labels.to(device)

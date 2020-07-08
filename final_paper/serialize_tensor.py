@@ -8,6 +8,7 @@ def serialize(dataset,
               featurizer,
               path = "./serialized_data",
               batch_size=25600,
+              bert_layer=-1
             ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using {device} for serializing")
@@ -27,8 +28,8 @@ def serialize(dataset,
         X_mask = X_mask.to(device)
         # BERT Encoder
         with torch.no_grad():
-            output = encoder(X, attention_mask = X_mask)
-
+            final_hidden_states, cls_output, output_hidden_states = encoder(X, attention_mask = X_mask)
+        output = output_hidden_states[bert_layer]
         inputs = featurizer(output) 
         tensor_name = f"{featurizer.__name__}-{step}"
         inputs = inputs.detach().cpu().numpy()
@@ -61,6 +62,12 @@ if __name__ == "__main__":
                 required=False,
                 help="Number of sample per array saved")
     
+    parser.add_argument("--bert_layer",
+                default=-1, # Last layer out put 
+                type=int,
+                required=False,
+                help="Extract certain layer of BERT output, 0 to 12")
+    
     args = parser.parse_args()
 
     if args.featurizer == "cls_featurizer":
@@ -69,12 +76,18 @@ if __name__ == "__main__":
         feat = featurizer.avg_pooling_featurizer
     else:
         raise ValueError("Please enter name of existing featurizer")
+    
+    assert args.bert_layer >=0 and args.bert_layer <= 12, "Incorrect bert layer value, 0 to"
 
     create_directory(args.output_dir)
 
     hf_weights_name = 'bert-base-uncased'
     bert_tokenizer = BertTokenizer.from_pretrained(hf_weights_name)
-    bert_model = BertModel.from_pretrained(hf_weights_name)
+    if args.bert_layer == -1:
+        bert_model = BertModel.from_pretrained(hf_weights_name)
+    else:
+        bert_model = BertModel.from_pretrained(hf_weights_name, output_hidden_states=True)
+
     for param in bert_model.parameters():
         param.requires_grad = False
     train_dataset = PPDBDataset(corpus_path=args.data_path,

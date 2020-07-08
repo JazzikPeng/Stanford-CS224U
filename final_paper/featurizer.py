@@ -10,8 +10,7 @@ def cls_featurizer(encoder_output):
     final_hidden_state, cls_output = encoder_output
     return cls_output
 
-def avg_pooling_featurizer(encoder_output):
+def avg_pooling_featurizer(hidden_state):
     """Construct Average pooling"""
-    final_hidden_state, cls_output = encoder_output
-    return torch.mean(final_hidden_state, axis=1)
+    return torch.mean(hidden_state, axis=1)
 
