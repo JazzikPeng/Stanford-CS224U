@@ -145,7 +145,7 @@ def train(dataset,
     for epoch in trange(epochs, desc='Epochs'):
         tr_loss = 0.
         nb_tr_examples, nb_tr_steps = 0, 0
-        print("Start Training")
+        print(f"Start Training Epoch {epoch}")
         for step,  (X, X_mask, labels) in enumerate(tqdm(train_dataloader, desc="Iteration")):
             X = X.to(device)
             X_mask = X_mask.to(device)
@@ -234,7 +234,7 @@ if __name__ == "__main__":
                         seq_len=128) # max seq_length is 129, 128 is appropriate length
 
     model = logisticRegressionClassifier(2, input_dim=768)
-    train(train_dataset, model, encoder=bert_model, featurizer=feat, epochs=args.epochs)
+    train(train_dataset, model, encoder=bert_model, featurizer=feat, epochs=args.epochs, batch_size=8)
 
 
 

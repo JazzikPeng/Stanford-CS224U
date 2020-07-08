@@ -18,6 +18,48 @@ def create_directory(dir_path: str) -> None:
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
+def glove2dict(src_filename):
+    """GloVe Reader.
+
+    Parameters
+    ----------
+    src_filename : str
+        Full path to the GloVe file to be processed.
+
+    Returns
+    -------
+    dict
+        Mapping words to their GloVe vectors as `np.array`.
+
+    """
+    # This distribution has some words with spaces, so we have to
+    # assume its dimensionality and parse out the lines specially:
+    if '840B.300d' in src_filename:
+        line_parser = lambda line: line.rsplit(" ", 300)
+    else:
+        line_parser = lambda line: line.strip().split()
+    data = {}
+    with open(src_filename, encoding='utf8') as f:
+        while True:
+            try:
+                line = next(f)
+                line = line_parser(line)
+                data[line[0]] = np.array(line[1: ], dtype=np.float)
+            except StopIteration:
+                break
+            except UnicodeDecodeError:
+                pass
+    return data
+
+
+def convert_ppdb_pairs_to_input_text(pair):
+    SEP_TOKEN = "[SEP]"
+    text1, text2, rel = pair['text1'], pair['text2'], pair['relationship']
+    label = 0 if rel=='Negative' else 1
+    text = text1 + " " + SEP_TOKEN + " "+ text2
+    return text, label
+
+
 def fix_random_seeds(
         seed=42,
         set_system=True,
