@@ -30,7 +30,8 @@ TIMESTAMP = time.time()
 log_level = logging.INFO
 logger = logging.getLogger()
 logger.setLevel(log_level)
-handler = logging.FileHandler("./log/train_MLP1_probe_serialized_{}.log".format(TIMESTAMP))
+handler = logging.FileHandler("./log/train_MLP1_probe_serialized_{}.log"
+    .format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(TIMESTAMP))))
 handler.setLevel(log_level)
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
 handler.setFormatter(formatter)
@@ -69,6 +70,7 @@ def adjust_learning_rate(optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+#TODO: Update early_stopping_monitor
 def early_stopping_monitor(f1_score, monitor='val_f1', patience=10):
     """
     Early stopping after number of epochs with no val_loss 
@@ -80,7 +82,8 @@ def early_stopping_monitor(f1_score, monitor='val_f1', patience=10):
     """
     f1_score = f1_score[monitor]
     recent_f1 = f1_score[:patience]
-    if sorted(recent_f1, reverse=True) == recent_f1 and len(recent_f1) > patience:
+    print(recent_f1)
+    if recent_f1[0] > recent_f1[-1] and len(recent_f1) > patience:
         return True
     else:
         return False
@@ -89,7 +92,7 @@ def early_stopping_monitor(f1_score, monitor='val_f1', patience=10):
 def test(dataloader, classifier, device):
     classifier.eval()
     y_true, y_pred = [], []
-    for step,  (inputs, labels) in enumerate(tqdm(dataloader, desc="Iteration")):
+    for step,  (inputs, labels) in enumerate(dataloader):
         inputs = inputs.to(device)
         outputs = classifier(inputs)
         y_true.extend(list(labels.numpy()))
@@ -184,11 +187,22 @@ def serialized_train(dataset,
         f"{file_name_head}_train_loss_per_epoch"), train_loss)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    ## Required parameters
+    parser.add_argument("--data_path",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="The serialized input ppdb pairs.")
+    args = parser.parse_args()
+
     fix_random_seeds(seed=42)
     featurizer = "avg_pooling_featurizer"
-    dataset = PPDBSerializedDataset("./serialized_data", featurizer)
-    dataset.__getitem__(1)
+    dataset = PPDBSerializedDataset(args.data_path, featurizer)
     model = MLP1Classifier(2, input_dim=768)
+
+    logger.info('Input Data: {} | Featurizer: {}'.format(args.data_path, featurizer))
+
     serialized_train(dataset,
           model, 
           encoder='BertModel',
@@ -196,5 +210,4 @@ if __name__ == "__main__":
           path = "./model_checkpoint",
           epochs=100, 
           lr=0.01,
-          batch_size=1024,
-          )
+          batch_size=1024)

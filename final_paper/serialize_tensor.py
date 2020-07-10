@@ -57,7 +57,7 @@ if __name__ == "__main__":
                     help="Directory to save serialized data")
 
     parser.add_argument("--tensor_size",
-                default = 25600,
+                default = 10240,
                 type=int,
                 required=False,
                 help="Number of sample per array saved")
@@ -96,6 +96,6 @@ if __name__ == "__main__":
                         seq_len=128)
 
     serialize(train_dataset, encoder=bert_model, 
-        featurizer=feat, path=args.output_dir, batch_size=args.tensor_size)
+        featurizer=feat, path=args.output_dir, batch_size=args.tensor_size, bert_layer=args.bert_layer)
 
 
