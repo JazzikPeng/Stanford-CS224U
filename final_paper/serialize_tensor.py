@@ -96,6 +96,9 @@ if __name__ == "__main__":
                         seq_len=128)
 
     serialize(train_dataset, encoder=bert_model, 
-        featurizer=feat, path=args.output_dir, batch_size=args.tensor_size, bert_layer=args.bert_layer)
+        featurizer=feat, 
+        path=args.output_dir, 
+        batch_size=args.tensor_size, 
+        bert_layer=args.bert_layer)
 
 
